@@ -3,7 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
-
+using namespace std;
 HospitalSystem::HospitalSystem() : nextPatientId(1) {
     loadData();
 }
@@ -12,32 +12,30 @@ HospitalSystem::~HospitalSystem() {
     saveData();
 }
 
-void HospitalSystem::addPatient(std::string name, int age, std::string disease, int priority) {
+void HospitalSystem::addPatient(string name, int age, string disease, int priority) {
     Patient p = {nextPatientId++, name, age, disease, priority};
     records[p.id] = p;
     opdQueue.push(p);
-    std::cout << "Patient added successfully. ID: " << p.id << std::endl;
+    cout << "Patient added successfully. ID: " << p.id <<endl;
 }
 
 void HospitalSystem::searchPatient(int id) const {
     auto it = records.find(id);
     if (it != records.end()) {
         const Patient& p = it->second;
-        std::cout << "\n--- Patient Record Found ---" << std::endl;
-        std::cout << "ID: " << p.id << "\nName: " << p.name << "\nAge: " << p.age 
-                  << "\nDisease: " << p.disease << "\nPriority: " << p.priorityLevel << std::endl;
+        cout << "\n--- Patient Record Found ---" << endl;
+        cout << "ID: " << p.id << "\nName: " << p.name << "\nAge: " << p.age 
+                  << "\nDisease: " << p.disease << "\nPriority: " << p.priorityLevel << endl;
     } else {
-        std::cout << "Patient with ID " << id << " not found." << std::endl;
+        cout << "Patient with ID " << id << " not found." << endl;
     }
 }
 
 void HospitalSystem::dischargePatient(int id) {
     if (records.erase(id)) {
-        std::cout << "Patient with ID " << id << " has been discharged." << std::endl;
-        // Note: The patient remains in the priority queue but will be ignored when served
-        // if not found in the records map.
+        cout << "Patient with ID " << id << " has been discharged." << endl;
     } else {
-        std::cout << "Patient with ID " << id << " not found." << std::endl;
+        cout << "Patient with ID " << id << " not found." << endl;
     }
 }
 
@@ -45,38 +43,36 @@ void HospitalSystem::serveNextPatient() {
     while (!opdQueue.empty()) {
         Patient p = opdQueue.top();
         opdQueue.pop();
-
-        // Check if the patient still exists (wasn't discharged)
         if (records.find(p.id) != records.end()) {
-            std::cout << "\n--- Serving Patient ---" << std::endl;
-            std::cout << "ID: " << p.id << "\nName: " << p.name << "\nPriority: " << p.priorityLevel << std::endl;
-            records.erase(p.id); // Remove from records after serving
+            cout << "--- Serving Patient ---" << endl;
+            cout << "ID: " << p.id << "\nName: " << p.name << "\nPriority: " << p.priorityLevel << endl;
+            records.erase(p.id); 
             return;
         }
     }
-    std::cout << "No patients in the OPD queue." << std::endl;
+    cout << "No patients in the OPD queue." << endl;
 }
 
 void HospitalSystem::displayAll() const {
     if (records.empty()) {
-        std::cout << "No patient records available." << std::endl;
+        cout << "No patient records available." << endl;
         return;
     }
 
-    std::cout << "\n" << std::left << std::setw(5) << "ID" << std::setw(20) << "Name" 
-              << std::setw(5) << "Age" << std::setw(20) << "Disease" << "Priority" << std::endl;
-    std::cout << std::string(60, '-') << std::endl;
+    cout << "\n" << left << setw(5) << "ID" << setw(20) << "Name" 
+              << setw(5) << "Age" << setw(20) << "Disease" << "Priority" << endl;
+    cout << string(60, '-') << endl;
 
     for (auto const& [id, p] : records) {
-        std::cout << std::left << std::setw(5) << p.id << std::setw(20) << p.name 
-                  << std::setw(5) << p.age << std::setw(20) << p.disease << p.priorityLevel << std::endl;
+        cout << left << setw(5) << p.id << setw(20) << p.name 
+                  << setw(5) << p.age << setw(20) << p.disease << p.priorityLevel << endl;
     }
 }
 
 void HospitalSystem::saveData() const {
-    std::ofstream outFile(dataFile);
+    ofstream outFile(dataFile);
     if (!outFile) {
-        std::cerr << "Error: Could not open file for saving." << std::endl;
+        cerr << "Error: Could not open file for saving." << endl;
         return;
     }
 
@@ -88,30 +84,30 @@ void HospitalSystem::saveData() const {
 }
 
 void HospitalSystem::loadData() {
-    std::ifstream inFile(dataFile);
+    ifstream inFile(dataFile);
     if (!inFile) return;
 
-    std::string line;
-    if (std::getline(inFile, line)) {
-        nextPatientId = std::stoi(line);
+    string line;
+    if (getline(inFile, line)) {
+        nextPatientId = stoi(line);
     }
 
-    while (std::getline(inFile, line)) {
-        std::stringstream ss(line);
-        std::string segment;
-        std::vector<std::string> data;
+    while (getline(inFile, line)) {
+        stringstream ss(line);
+        string segment;
+        vector<string> data;
 
-        while (std::getline(ss, segment, '|')) {
+        while (getline(ss, segment, '|')) {
             data.push_back(segment);
         }
 
         if (data.size() == 5) {
             Patient p;
-            p.id = std::stoi(data[0]);
+            p.id = stoi(data[0]);
             p.name = data[1];
-            p.age = std::stoi(data[2]);
+            p.age = stoi(data[2]);
             p.disease = data[3];
-            p.priorityLevel = std::stoi(data[4]);
+            p.priorityLevel = stoi(data[4]);
 
             records[p.id] = p;
             opdQueue.push(p);
